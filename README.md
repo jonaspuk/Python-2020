@@ -1,12 +1,4 @@
 # Python-2020
-gogogo
-gogogo
-testing inserting new line several times yeah this is good :)
- times
-testing inserting new line several times
-testing inserting new line several times
-test python 2020 what am I doing here :)
-
-
-
-This is a redme file to test this  
+#This script is run after the file is downloaded by transmission.
+#It then determines if the folder is a tv-show or a film and will move the files to their respected
+#directories for plex to pickup correctly.

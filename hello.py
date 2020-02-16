@@ -1,5 +1,5 @@
-#!/bin/bash
+#!/bin/python
 
-echo "Hello World"
+import time
 
-echo "this is a change"
+print(time.time())
