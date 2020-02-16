@@ -5,7 +5,7 @@
 #directories for plex to pickup correctly.
 
 import os,subprocess,shutil,logging,time
-from time import sleep
+from datetime import datetime
 
 LOG_FILENAME = '/var/log/plex_script.log'
 logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG)
@@ -14,11 +14,12 @@ logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG)
 path = "/mnt/sdb/transmission/complete/"
 dest_path = "/mnt/sdb/plexmediaserver/movies/"
 dir_contents = os.listdir(path)
-
-time = time.time()
+script_start_time = datetime.now()
 
 logging.debug("----------Beggining of log Entry----------\n")
 logging.debug("The script started")
+logging.debug(datetime.now())
+
 
 global_path = []
 for x in dir_contents: #take the array of directory contents and add the full path to each item and store it in global path array
@@ -47,21 +48,24 @@ for i in global_path:
         pass
     else:
         try:
-            items_inside_directory = len(os.listdir(i))
+            items_inside_directory = len(os.listdir(i))    
+            if items_inside_directory > 3: # needs to be less than three (currently > for testing purposes)
+                duration_of_each_item = []
+                for f in os.listdir(i):
+                    duration_of_each_item.append(get_length(i +"/"+ f)) # Get duration of each and every item and add to array
+                if max(duration_of_each_item) < 5000: # if the longest duration of the item is less than 5000s, pass
+                    logging.debug("Skipping ->"+ "'"+i+"'" +" is less than 5000, likely a TV Show")
+            else:
+                try:
+                    shutil.move(i, dest_path + i.lstrip(path)+"/")  # copy the directory to destination
+                except Exception as e:
+                    logging.error(e)
+                pass
         except Exception as e:
-            logging.error(e)   #check if ffmpeg can read video file duration   
-        if items_inside_directory > 3: # needs to be less than three (currently > for testing purposes)
-            duration_of_each_item = []
-            for f in os.listdir(i):
-                duration_of_each_item.append(get_length(i +"/"+ f)) # Get duration of each and every item and add to array
-            if max(duration_of_each_item) < 5000: # if the longest duration of the item is less than 5000s, pass
-                logging.debug("Skipping ->"+ "'"+i+"'" +" is less than 5000, likely a TV Show")
-        else:
-            try:
-                shutil.move(i, dest_path + i.lstrip(path)+"/")  # copy the directory to destination
-            except Exception as e:
-                logging.error(e)
-            pass
+            logging.error(e)   #check if ffmpeg can read video file duration      
                 
-logging.debug("The script finished successfully!\n")
+script_end_time = datetime.now()                
+logging.debug("The script finished successfully!")
+logging.debug("Completed in:")
+logging.debug(script_end_time - script_start_time)
 exit(logging.debug("-------------End of log Entry-------------\n"))
